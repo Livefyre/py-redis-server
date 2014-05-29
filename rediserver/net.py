@@ -77,34 +77,24 @@ class RedisProtocolHandler(asynchat.async_chat):
         self.can_read = False
         self._process_data()
 
+    def _response_done(self, response):
+        resp = self.wfile.getvalue()
+        self.wfile = cStringIO.StringIO()
+        self.data = []
+        self.push(resp)
+        self.close_when_done()
+
     def _process_data(self):
         response = Response(self.wfile.write)
-        try:
-            cmd = InputParser(self.data).read_response()
-            self.server._callback(cmd, response, self)
-            if not response.dirty:
-                raise Exception("no response")
-        except Exception, e:
-            response.error(u"ERR: %s" % e)
-            raise
-        finally:
-            resp = self.wfile.getvalue()
-            self.wfile = cStringIO.StringIO()
-            self.data = []
-
-            # write the data out async; close_when_done actually
-            # causes handle_close to be called, and we unblock and
-            # enable reads again.
-            self.push(resp)
-            self.close_when_done()
-
+        cmd = InputParser(self.data).read_response()
+        self.server._callback(cmd, response, self._response_done)
 
 class AsyncoreServer(asyncore.dispatcher):
     protocol_handler = RedisProtocolHandler
     allow_address_reuse = True
     backlog = 1024
 
-    def __init__(self, ip, port, callback, ):
+    def __init__(self, ip, port, callback,):
         self.ip = ip
         self.port = port
         self._callback = callback
