@@ -12,7 +12,6 @@ setup(
     url="https://github.com/ninowalker/py-redis-server",
     license = "BSD",
     packages=['rediserver'],
-    long_description=open('README.md').read(),
     install_requires=['redis>=2.4.1'],
     setup_requires=['nose>=1.0', 'coverage', 'nosexcover'],
     test_suite = 'nose.collector',
