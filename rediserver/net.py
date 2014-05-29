@@ -94,10 +94,11 @@ class AsyncoreServer(asyncore.dispatcher):
     allow_address_reuse = True
     backlog = 1024
 
-    def __init__(self, ip, port, callback,):
+    def __init__(self, ip, port, callback, select_timeout=30.0):
         self.ip = ip
         self.port = port
         self._callback = callback
+        self.select_timeout = select_timeout
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.allow_address_reuse:
@@ -107,7 +108,7 @@ class AsyncoreServer(asyncore.dispatcher):
 
     def serve_forever(self):
         """Starts the asyncore IO loop."""
-        asyncore.loop()
+        asyncore.loop(timeout=self.select_timeout)
 
     def handle_accept(self):
         try:
