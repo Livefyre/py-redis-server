@@ -41,7 +41,7 @@ class Response(object):
         elif isinstance(value, bool):
             self._write(':%d\r\n' % (1 if value else 0))
         else:
-            self._bulk(v)
+            self._bulk(value)
 
     def status(self, msg="OK"):
         """Send a status."""
